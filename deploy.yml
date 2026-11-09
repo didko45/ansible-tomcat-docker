@@ -18,6 +18,10 @@
       ansible.builtin.set_fact:
         previous_version: "{{ tomcat_app_current.container.Config.Image.split(':') | last }}"
 
+    - name: Skip hosts already running version {{ tomcat_app_version }}
+      ansible.builtin.meta: end_host
+      when: previous_version == tomcat_app_version | string
+
     - name: Drain from load balancer
       ansible.builtin.include_tasks: tasks/lb_member.yml
       vars:
