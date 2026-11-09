@@ -1,0 +1,26 @@
+# Enable or disable this host in the httpd balancer via balancer-manager.
+# Expects: lb_url, lb_member, lb_disabled (1 = drain, 0 = enable)
+- name: Read balancer-manager nonce
+  ansible.builtin.uri:
+    url: "{{ lb_url }}"
+    return_content: true
+  register: lb_page
+  delegate_to: control
+  become: false
+
+- name: "{{ 'Drain' if lb_disabled | int == 1 else 'Enable' }} {{ inventory_hostname }} in the load balancer"
+  ansible.builtin.uri:
+    url: "{{ lb_url }}"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      b: app_cluster
+      w: "{{ lb_member }}"
+      w_status_D: "{{ lb_disabled }}"
+      nonce: "{{ lb_page.content | regex_search('nonce=([0-9a-f-]+)', '\\1') | first }}"
+    headers:
+      Referer: "{{ lb_url }}"
+    status_code: 200
+  delegate_to: control
+  become: false
+  changed_when: true

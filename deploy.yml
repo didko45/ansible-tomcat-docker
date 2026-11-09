@@ -1,0 +1,57 @@
+- name: Rolling deploy of tomcat-app
+  hosts: app
+  become: true
+  serial: 1
+  max_fail_percentage: 0
+
+  vars:
+    lb_url: "http://{{ hostvars['control'].ansible_host }}/balancer-manager"
+    lb_member: "http://{{ ansible_host }}:{{ tomcat_app_port | default(8080) }}"
+
+  tasks:
+    - name: Read the currently running container
+      community.docker.docker_container_info:
+        name: tomcat-app
+      register: tomcat_app_current
+
+    - name: Remember the current version for rollback
+      ansible.builtin.set_fact:
+        previous_version: "{{ tomcat_app_current.container.Config.Image.split(':') | last }}"
+
+    - name: Drain from load balancer
+      ansible.builtin.include_tasks: tasks/lb_member.yml
+      vars:
+        lb_disabled: 1
+
+    - name: Let in-flight requests finish
+      ansible.builtin.pause:
+        seconds: 3
+
+    - name: Deploy new version, roll back on failure
+      block:
+        - name: Deploy version {{ tomcat_app_version }}
+          ansible.builtin.include_role:
+            name: tomcat_app
+
+      rescue:
+        - name: Roll back to version {{ previous_version }}
+          ansible.builtin.include_role:
+            name: tomcat_app
+          vars:
+            tomcat_app_version: "{{ previous_version }}"
+
+        - name: Return rolled-back host to load balancer
+          ansible.builtin.include_tasks: tasks/lb_member.yml
+          vars:
+            lb_disabled: 0
+
+        - name: Stop the rollout
+          ansible.builtin.fail:
+            msg: >-
+              {{ inventory_hostname }}: version {{ tomcat_app_version }} failed health checks.
+              Rolled back to {{ previous_version }}. Remaining hosts were not touched.
+
+    - name: Return to load balancer
+      ansible.builtin.include_tasks: tasks/lb_member.yml
+      vars:
+        lb_disabled: 0

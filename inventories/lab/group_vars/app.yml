@@ -2,4 +2,4 @@ docker_insecure_registries:
   - "192.168.56.10:5000"
 
 tomcat_app_image: "192.168.56.10:5000/tomcat-docker"
-tomcat_app_version: "0.3"
+tomcat_app_version: "0.4"

@@ -1,6 +1,7 @@
 - name: Run application container
   community.docker.docker_container:
     name: "{{ tomcat_app_container_name }}"
+    image_name_mismatch: recreate
     image: "{{ tomcat_app_image }}:{{ tomcat_app_version }}"
     state: started
     restart_policy: unless-stopped
