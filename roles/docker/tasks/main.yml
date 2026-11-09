@@ -39,3 +39,7 @@
     name: docker
     state: started
     enabled: true
+
+# Apply daemon changes now; later roles pull images and need the new config
+- name: Apply pending Docker restarts before continuing
+  ansible.builtin.meta: flush_handlers

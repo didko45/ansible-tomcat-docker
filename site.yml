@@ -1,9 +1,33 @@
-- name: Common baseline for app servers
+- name: Container registry on control
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: false
+  tags: registry
+  tasks:
+    - name: Install Docker API client dependency
+      ansible.builtin.dnf:
+        name: python3-requests
+        state: present
+
+    - name: Run local container registry
+      community.docker.docker_container:
+        name: registry
+        image: registry:2
+        state: started
+        restart_policy: always
+        published_ports:
+          - "5000:5000"
+        volumes:
+          - registry-data:/var/lib/registry
+
+- name: Application servers
   hosts: app
   become: true
   roles:
     - common
     - docker
+    - tomcat_app
 
 - name: Keep control's known_hosts in sync with app servers
   hosts: localhost

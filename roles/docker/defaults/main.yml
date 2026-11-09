@@ -6,3 +6,5 @@ docker_packages:
 
 docker_log_max_size: "10m"
 docker_log_max_file: 3
+
+docker_insecure_registries: []

@@ -1,0 +1,6 @@
+collections:
+  # Pinned to the last major versions that support ansible-core 2.14 (Rocky Linux 9)
+  - name: community.docker
+    version: ">=3.0.0,<4.0.0"
+  - name: ansible.posix
+    version: ">=1.5.0,<2.0.0"

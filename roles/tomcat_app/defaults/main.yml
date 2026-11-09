@@ -1,0 +1,5 @@
+tomcat_app_image: "tomcat-docker"
+tomcat_app_version: "latest"
+tomcat_app_container_name: tomcat-app
+tomcat_app_port: 8080
+tomcat_app_memory: "512m"

@@ -1,0 +1,20 @@
+- name: Run application container
+  community.docker.docker_container:
+    name: "{{ tomcat_app_container_name }}"
+    image: "{{ tomcat_app_image }}:{{ tomcat_app_version }}"
+    state: started
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ tomcat_app_port }}:8080"
+    env:
+      APP_VERSION: "{{ tomcat_app_version }}"
+    memory: "{{ tomcat_app_memory }}"
+
+- name: Wait until the application is healthy
+  ansible.builtin.uri:
+    url: "http://localhost:{{ tomcat_app_port }}/health"
+    status_code: 200
+  register: tomcat_app_health
+  until: tomcat_app_health.status == 200
+  retries: 20
+  delay: 3
