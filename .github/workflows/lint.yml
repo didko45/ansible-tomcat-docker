@@ -1,0 +1,31 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ansible-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install the same toolchain as the control node
+        run: pip install "ansible-core==2.14.18" "ansible-lint==6.22.2"
+
+      - name: Install pinned collections
+        run: ansible-galaxy collection install -r collections/requirements.yml
+
+      - name: Syntax check playbooks
+        run: |
+          ansible-playbook site.yml --syntax-check
+          ansible-playbook deploy.yml --syntax-check
+
+      - name: ansible-lint (production profile)
+        run: ansible-lint
