@@ -18,7 +18,7 @@
       ansible.builtin.set_fact:
         previous_version: "{{ tomcat_app_current.container.Config.Image.split(':') | last }}"
 
-    - name: Skip hosts already running version {{ tomcat_app_version }}
+    - name: Skip hosts already running the target version
       ansible.builtin.meta: end_host
       when: previous_version == tomcat_app_version | string
 
