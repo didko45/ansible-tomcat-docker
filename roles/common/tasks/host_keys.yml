@@ -1,0 +1,10 @@
+# Hosts cloned from one image share the same SSH host keys.
+# Regenerate them once; the marker file keeps this idempotent.
+- name: Regenerate SSH host keys cloned from the box image
+  ansible.builtin.shell: |
+    rm -f /etc/ssh/ssh_host_*
+    ssh-keygen -A
+    touch /etc/ssh/.host_keys_regenerated
+  args:
+    creates: /etc/ssh/.host_keys_regenerated
+  notify: Restart sshd

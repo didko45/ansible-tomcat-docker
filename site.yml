@@ -1,0 +1,34 @@
+- name: Common baseline for app servers
+  hosts: app
+  become: true
+  roles:
+    - common
+
+- name: Keep control's known_hosts in sync with app servers
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Read current ED25519 host keys
+      ansible.builtin.command: "ssh-keyscan -t ed25519 {{ hostvars[item].ansible_host }}"
+      loop: "{{ groups['app'] }}"
+      register: keyscan
+      changed_when: false
+
+    - name: Trust host keys by IP
+      ansible.builtin.known_hosts:
+        name: "{{ hostvars[item.item].ansible_host }}"
+        key: "{{ item.stdout }}"
+        state: present
+      loop: "{{ keyscan.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Trust host keys by name
+      ansible.builtin.known_hosts:
+        name: "{{ item.item }}"
+        key: "{{ item.item }} {{ item.stdout.split(' ', 1)[1] }}"
+        state: present
+      loop: "{{ keyscan.results }}"
+      loop_control:
+        label: "{{ item.item }}"

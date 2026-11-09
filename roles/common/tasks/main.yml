@@ -1,0 +1,21 @@
+- name: Install common packages
+  ansible.builtin.dnf:
+    name: "{{ common_packages }}"
+    state: present
+
+- name: Ensure chronyd is running and enabled
+  ansible.builtin.service:
+    name: chronyd
+    state: started
+    enabled: true
+
+- name: Set login banner
+  ansible.builtin.template:
+    src: motd.j2
+    dest: /etc/motd
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Make SSH host keys unique
+  ansible.builtin.import_tasks: host_keys.yml

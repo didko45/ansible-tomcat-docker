@@ -1,0 +1,5 @@
+common_packages:
+  - tree
+  - vim-enhanced
+  - curl
+  - chrony
