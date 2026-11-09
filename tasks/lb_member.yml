@@ -8,7 +8,7 @@
   delegate_to: control
   become: false
 
-- name: "{{ 'Drain' if lb_disabled | int == 1 else 'Enable' }} {{ inventory_hostname }} in the load balancer"
+- name: "Load balancer: {{ ('drain ' if lb_disabled | int == 1 else 'enable ') ~ inventory_hostname }}"
   ansible.builtin.uri:
     url: "{{ lb_url }}"
     method: POST
