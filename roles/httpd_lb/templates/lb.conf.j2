@@ -1,0 +1,17 @@
+# Managed by Ansible - manual changes will be overwritten
+<Proxy "balancer://app_cluster">
+{% for host in groups[httpd_lb_backend_group] %}
+    BalancerMember "http://{{ hostvars[host].ansible_host }}:{{ httpd_lb_backend_port }}" route={{ host }}
+{% endfor %}
+    ProxySet lbmethod=byrequests
+</Proxy>
+
+ProxyPreserveHost On
+ProxyPass        "/balancer-manager" !
+ProxyPass        "/" "balancer://app_cluster/"
+ProxyPassReverse "/" "balancer://app_cluster/"
+
+<Location "/balancer-manager">
+    SetHandler balancer-manager
+    Require ip 127.0.0.1 {{ httpd_lb_admin_network }}
+</Location>

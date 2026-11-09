@@ -1,0 +1,25 @@
+- name: Install Apache HTTP Server
+  ansible.builtin.dnf:
+    name: httpd
+    state: present
+
+- name: Allow httpd to make outbound network connections (SELinux)
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: true
+    persistent: true
+
+- name: Configure load balancer
+  ansible.builtin.template:
+    src: lb.conf.j2
+    dest: /etc/httpd/conf.d/lb.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload httpd
+
+- name: Ensure httpd is running and enabled
+  ansible.builtin.service:
+    name: httpd
+    state: started
+    enabled: true

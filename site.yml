@@ -57,3 +57,9 @@
       loop: "{{ keyscan.results }}"
       loop_control:
         label: "{{ item.item }}"
+
+- name: Load balancer
+  hosts: lb
+  become: true
+  roles:
+    - httpd_lb
