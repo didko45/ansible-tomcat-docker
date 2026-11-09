@@ -3,6 +3,7 @@
   become: true
   roles:
     - common
+    - docker
 
 - name: Keep control's known_hosts in sync with app servers
   hosts: localhost

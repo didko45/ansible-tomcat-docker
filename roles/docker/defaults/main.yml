@@ -1,0 +1,8 @@
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - python3-requests
+
+docker_log_max_size: "10m"
+docker_log_max_file: 3
